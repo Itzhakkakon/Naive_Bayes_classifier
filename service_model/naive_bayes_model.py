@@ -68,3 +68,14 @@ class NaiveBayesModel:
                     k: log(v / total) for k, v in value_dict.items()
                 }
         return weights
+
+    def classify(self, row, model_weights):
+        scores = {}
+        for cls, cls_data in model_weights.items():
+            score = cls_data['__prior__']
+            for feature, value in row.items():
+                if feature in cls_data and value in cls_data[feature]:
+                    score += cls_data[feature][value]
+            scores[cls] = score
+        return max(scores, key=scores.get)
+
