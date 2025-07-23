@@ -1,72 +1,42 @@
-# from service_data_loader.data_loader import load_data
-# from pprint import pprint
-# from service_model.naive_bayes_model import NaiveBayesModel
-# from service_preprocessor.data_splitter import split_data
-#
-# if __name__ == "__main__":
-#     data = load_data()
-#     target = data.columns.tolist()[-1]
-#     train_data, test_data = split_data(data, target)
-#     model = NaiveBayesModel(alpha = 1.0)
-#     model_weights = model.build_model(train_data, target)
-#
-#     print("מודל Naive Bayes נבנה בהצלחה")
-#     pprint(model)
-# main.py או server.py
+# app.py
 
-# שלב 0: ייבוא כל הרכיבים הדרושים
-from service_data_loader.data_loader import load_data
-from service_preprocessor.cleaner import clean_data # <-- לאחר שתעביר אותו לתיקייה הנכונה
-from service_preprocessor.data_splitter import split_data
-from service_model.naive_bayes_model import NaiveBayesModel
-from service_evaluator.evaluator import evaluate
-# from flask import Flask, request, jsonify  # <-- תצטרך להתקין ולהוסיף את זה בשלב השרת
+from fastapi import FastAPI, Request, HTTPException
+import pandas as pd
+from manager import build_and_evaluate_model # <-- מייבא את קוד הבנייה
+from service_predictor.predictor import ModelPredictor
 
-# =================================================================
-#  חלק 1: בנייה ובדיקה של המודל (רץ פעם אחת בהתחלה)
-# =================================================================
+# --- שלב 1: ביצוע תהליך הבנייה ---
+# הקריאה הזו מפעילה את כל הקוד שנמצא ב-manager.py
+model, model_weights, target_col_name, feature_names = build_and_evaluate_model()
 
-print("1. טוען נתונים...")
-data = load_data()
+# --- שלב 2: הכנת השרת ---
+predictor = ModelPredictor(model_weights)
+app = FastAPI(title="Mushroom Classifier API")
 
-print("2. מטפל בנתונים (ניקוי)...")
-# שים לב: חשוב להעביר את cleaner.py ל-service_preprocessor
-cleaned_data = clean_data(data)
+# --- שלב 3: הגדרת נקודת הקצה לחיזוי ---
+@app.get("/classify")
+def classify_endpoint(request: Request):
+    # (הקוד של ה-endpoint מפה והלאה זהה לקוד מהתשובה הקודמת)
+    instance_data = dict(request.query_params)
+    missing_features = [
+        feature for feature in feature_names if feature not in instance_data
+    ]
+    if missing_features:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Missing features", "missing": missing_features},
+        )
+    try:
+        instance_as_series = pd.Series(instance_data)
+        prediction = predictor.predict(instance_as_series)
+        return {"input_features": instance_data, "prediction": prediction}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-# הגדרת משתנה המטרה
-target = cleaned_data.columns.tolist()[-1]
 
-print("3. מפצל נתונים לאימון ובדיקה...")
-train_data, test_data = split_data(cleaned_data, target, test_size=0.3)
-
-print("4. בונה ומאמן את מודל Naive Bayes...")
-# יצירת מופע של המודל
-model = NaiveBayesModel(alpha=1.0)
-# אימון המודל על נתוני האימון
-model_weights = model.build_model(train_data, target)
-print("   המודל נבנה בהצלחה!")
-
-print("5. בודק את ביצועי המודל...")
-accuracy = evaluate(model, model_weights, test_data, target)
-print(f"   רמת הדיוק של המודל על סט הבדיקה: {accuracy:.2%}")
-
-# # =================================================================
-# #  חלק 2: הפעלת השרת והאזנה לבקשות סיווג
-# # =================================================================
-#
-# # בשלב זה, המשתנים 'model' ו-'model_weights' מוכנים לשימוש
-# print("\n6. מפעיל שרת וממתין לבקשות סיווג...")
-#
-# # כאן יבוא הקוד של השרת (לדוגמה, עם Flask)
-# # app = Flask(__name__)
-#
-# # @app.route('/classify', methods=['GET'])
-# # def classify_endpoint():
-# #     # כאן תקבל נתונים חדשים מהבקשה
-# #     # תשתמש ב- model.classify(new_data, model_weights)
-# #     # ותחזיר את התוצאה
-# #     return jsonify({"prediction": "some_result"})
-#
-# # if __name__ == '__main__':
-# #     # app.run(debug=True)
-# #     print("השרת סיים את פעולתו.") # שורה זו תודפס רק אחרי כיבוי השרת
+# --- שלב 4: הרצת השרת ---
+# ניתן להוסיף את זה אם רוצים להריץ ישירות עם 'python app.py'
+if __name__ == "__main__":
+    import uvicorn
+    print("\n>>> מפעיל שרת וממתין לבקשות סיווג בכתובת http://127.0.0.1:8000 <<<")
+    uvicorn.run(app, host="127.0.0.1", port=8000)

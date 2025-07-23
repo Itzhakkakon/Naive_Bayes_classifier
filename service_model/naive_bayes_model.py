@@ -5,35 +5,38 @@ from math import log
 class NaiveBayesModel:
     def __init__(self, alpha: float = 1.0):
         self.alpha = alpha
+        self._df: pd.DataFrame | None = None
+        self._tc: str | None = None
 
     def build_model(self, train_data: pd.DataFrame, target_col: str):
-        df = train_data
-        counts_model = self.model_naive_bayes(df, target_col)
+        self._df = train_data
+        self._tc = target_col
+        counts_model = self._model_naive_bayes()
         weights_model = self._convert_counts_to_weights(counts_model)
         return weights_model
 
-    def model_naive_bayes(self,data: pd.DataFrame, target: str):
+    def _model_naive_bayes(self):
         target_counts = {}
-        for val in data[target].unique():
+        for val in self._df[self._tc].unique():
             target_counts[val] = 0
 
         feature_cols = []
-        for col in data.columns:
-            if col == target:
+        for col in self._df.columns:
+            if col == self._tc:
                 continue
             feature_cols.append(col)
         value_unique = {}
         for v in feature_cols:
             value_unique[v] = {}
-            for val in data[v].unique():
+            for val in self._df[v].unique():
                 value_unique[v][val] = 0
 
         likelihoods = {}
-        for v in data[target].unique():
+        for v in self._df[self._tc].unique():
             likelihoods[v] = deepcopy(value_unique)
 
-        for _, row in data.iterrows():
-            target_value = row[target]
+        for _, row in self._df.iterrows():
+            target_value = row[self._tc]
             target_counts[target_value] += 1
             for col in feature_cols:
                 likelihoods[target_value][col][row[col]] += 1
@@ -41,11 +44,9 @@ class NaiveBayesModel:
         result = {
             "likelihoods": likelihoods,
             "target_counts": target_counts,
-            "total_count": len(data)
+            "total_count": len(self._df)
         }
         return result
-
-
 
     def _convert_counts_to_weights(self, counts_model: dict):
         likelihoods = counts_model["likelihoods"]
@@ -68,14 +69,4 @@ class NaiveBayesModel:
                     k: log(v / total) for k, v in value_dict.items()
                 }
         return weights
-
-    def classify(self, row, model_weights):
-        scores = {}
-        for cls, cls_data in model_weights.items():
-            score = cls_data['__prior__']
-            for feature, value in row.items():
-                if feature in cls_data and value in cls_data[feature]:
-                    score += cls_data[feature][value]
-            scores[cls] = score
-        return max(scores, key=scores.get)
 
