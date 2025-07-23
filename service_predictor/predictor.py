@@ -3,7 +3,7 @@ class ModelPredictor:
     def __init__(self, model_weights):
         self._model_weights = model_weights
 
-    def predict(self, row: pd.Series):
+    def predict(self, row: pd.Series) -> str:
         scores = {}
         for cls, cls_data in self._model_weights.items():
             score = cls_data['__prior__']
@@ -12,7 +12,3 @@ class ModelPredictor:
             scores[cls] = score
         return max(scores, key=scores.get)
 
-
-if __name__ == "__main__":
-
-    pass

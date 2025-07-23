@@ -2,15 +2,7 @@ import pandas as pd
 
 
 def evaluate(model_instance, model_weights, test_data: pd.DataFrame, target_column: str):
-    """
-    מקבלת מודל מאומן וסט בדיקה, ומחשבת את רמת הדיוק של המודל.
 
-    :param model_instance: אובייקט של NaiveBayesModel כדי להשתמש במתודת ה-classify שלו.
-    :param model_weights: ה"משקולות" (הסתברויות) שהמודל למד.
-    :param test_data: DataFrame המכיל את נתוני הבדיקה.
-    :param target_column: שם העמודה של משתנה המטרה.
-    :return: ציון דיוק (float) בין 0 ל-1.
-    """
 
     # הפרדת המאפיינים (features) מהמטרה (target) בסט הבדיקה
     X_test = test_data.drop(columns=[target_column])
