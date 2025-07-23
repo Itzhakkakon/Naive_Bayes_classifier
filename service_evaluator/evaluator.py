@@ -12,7 +12,7 @@ def evaluate(predictor: ModelPredictor, test_data: pd.DataFrame, target_column: 
     # לולאה שעוברת על כל דגימה בסט הבדיקה
     for i in range(len(X_test)):
         # קבלת שורת נתונים אחת (מאפיינים) כדי לסווג
-        row_to_classify = X_test.iloc[i].to_dict()
+        row_to_classify = X_test.iloc[i]
 
         # קבלת התווית האמיתית של אותה שורה
         true_label = y_test.iloc[i]
