@@ -1,5 +1,3 @@
-# manager.py
-
 from service_data_loader.data_loader import load_data
 from service_preprocessor.cleaner import clean_data
 from service_preprocessor.data_splitter import split_data
@@ -41,11 +39,9 @@ def build_and_evaluate_model():
     model_weights = model.build_model(train_data, target_col)
     print("   המודל נבנה בהצלחה!")
 
-    # שינוי: צור את ה-predictor כאן, מיד אחרי שיש לך את המשקולות
     predictor = ModelPredictor(model_weights)
 
     print("5. בודק את ביצועי המודל...")
-    # שינוי: העבר את ה-predictor ל-evaluate במקום את model
     accuracy = evaluate(predictor, test_data, target_col)
     print(f"   רמת הדיוק של המודל על סט הבדיקה: {accuracy:.2%}")
 
