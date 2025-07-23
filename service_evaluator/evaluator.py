@@ -1,8 +1,7 @@
 import pandas as pd
+from service_predictor.predictor import ModelPredictor
 
-
-def evaluate(model_instance, model_weights, test_data: pd.DataFrame, target_column: str):
-
+def evaluate(predictor: ModelPredictor, test_data: pd.DataFrame, target_column: str):
 
     # הפרדת המאפיינים (features) מהמטרה (target) בסט הבדיקה
     X_test = test_data.drop(columns=[target_column])
@@ -19,7 +18,7 @@ def evaluate(model_instance, model_weights, test_data: pd.DataFrame, target_colu
         true_label = y_test.iloc[i]
 
         # שימוש במודל כדי לקבל חיזוי
-        predicted_label = model_instance.classify(row_to_classify, model_weights)
+        predicted_label = predictor.predict(row_to_classify)
 
         # בדיקה אם החיזוי היה נכון
         if predicted_label == true_label:

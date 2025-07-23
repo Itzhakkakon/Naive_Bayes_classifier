@@ -3,14 +3,10 @@
 from fastapi import FastAPI, Request, HTTPException
 import pandas as pd
 from manager import build_and_evaluate_model # <-- מייבא את קוד הבנייה
-from service_predictor.predictor import ModelPredictor
 
 # --- שלב 1: ביצוע תהליך הבנייה ---
 # הקריאה הזו מפעילה את כל הקוד שנמצא ב-manager.py
-model, model_weights, target_col_name, feature_names = build_and_evaluate_model()
-
-# --- שלב 2: הכנת השרת ---
-predictor = ModelPredictor(model_weights)
+predictor, model_weights, target_col_name, feature_names = build_and_evaluate_model()
 app = FastAPI(title="Mushroom Classifier API")
 
 # --- שלב 3: הגדרת נקודת הקצה לחיזוי ---
