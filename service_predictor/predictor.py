@@ -1,4 +1,4 @@
-# service_predictor/predictor.py
+#המסווג
 import pandas as pd
 
 class ModelPredictor:

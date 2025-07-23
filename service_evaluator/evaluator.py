@@ -1,3 +1,4 @@
+#בדיקת דיוק המודל(טסט)
 import pandas as pd
 from service_predictor.predictor import ModelPredictor
 
