@@ -9,6 +9,7 @@ from service_predictor.predictor import ModelPredictor
 
 def build_and_evaluate_model():
     """
+   טעינה -> ניקוי -> פיצול -> אימון -> הערכה.
     מריץ את כל תהליך בניית המודל, מהתחלה ועד הסוף.
     - טוען נתונים
     - מנקה אותם
