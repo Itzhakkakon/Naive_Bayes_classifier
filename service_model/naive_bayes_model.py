@@ -1,3 +1,4 @@
+#בניית מודל נאיבי בייס
 import pandas as pd
 from copy import deepcopy
 from math import log
